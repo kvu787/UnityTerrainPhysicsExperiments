@@ -29,7 +29,6 @@ public class GameLoop : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         Debug.Log(Input.mousePosition);
-        //Console.WriteLine("here");
 
         if (TryGetMouseHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint, out Vector3 hitNormal)) {
             this.Car.transform.SetPositionAndRotation(hitPoint, Quaternion.FromToRotation(Vector3.up, hitNormal.normalized));
@@ -45,6 +44,22 @@ public class GameLoop : MonoBehaviour {
         }
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
         if (collider.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
+            hitPoint = raycastHit.point;
+            hitNormal = raycastHit.normal.normalized;
+            return true;
+        }
+        return false;
+    }
+
+    // hitPoint is in world space and normalized
+    public static bool TryGetMouseHitPointAny(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
+        hitPoint = default;
+        hitNormal = default;
+        if (camera == null || collider == null) {
+            return false;
+        }
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
             hitPoint = raycastHit.point;
             hitNormal = raycastHit.normal.normalized;
             return true;
