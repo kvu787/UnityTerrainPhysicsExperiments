@@ -23,20 +23,22 @@ public class GameLoop : MonoBehaviour {
         Debug.Log(Input.mousePosition);
         //Console.WriteLine("here");
 
-        if (TryGetMouseHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint)) {
-            this.Car.transform.position = hitPoint;
+        if (TryGetMouseHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint, out Vector3 hitNormal)) {
+            this.Car.transform.SetPositionAndRotation(hitPoint, Quaternion.LookRotation(hitNormal));
         }
     }
 
     // hitPoint is in world space
-    public static bool TryGetMouseHitPoint(Camera camera, Collider collider, out Vector3 hitPoint) {
+    public static bool TryGetMouseHitPoint(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
         hitPoint = default;
+        hitNormal = default;
         if (camera == null || collider == null) {
             return false;
         }
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-        if (collider.Raycast(ray, out RaycastHit hit, Mathf.Infinity)) {
-            hitPoint = hit.point;
+        if (collider.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
+            hitPoint = raycastHit.point;
+            hitNormal = raycastHit.normal;
             return true;
         }
         return false;
