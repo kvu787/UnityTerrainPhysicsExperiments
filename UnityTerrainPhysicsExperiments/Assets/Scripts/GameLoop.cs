@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -12,6 +13,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class GameLoop : MonoBehaviour {
     public GameObject Car;
+    public GameObject CameraPivot;
     public Camera MainCamera;
     public Collider TerrainCollider;
 
@@ -40,21 +42,42 @@ public class GameLoop : MonoBehaviour {
             return;
         }
 
-        Debug.Log(Input.mousePosition);
+        Gamepad gamepad = Gamepad.current;
 
-        if (TryGetMouseHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint, out Vector3 hitNormal)) {
-            this.Car.transform.SetPositionAndRotation(hitPoint, Quaternion.FromToRotation(Vector3.up, hitNormal.normalized));
+        if (gamepad == null) {
+            return;
+        }
+
+        Vector2 leftStick = gamepad.leftStick.ReadValue();
+        Vector3 cameraPivotTranslation = new(leftStick.x, 0, leftStick.y);
+        cameraPivotTranslation = Quaternion.Euler(0f, this.CameraPivot.transform.eulerAngles.y, 0f) * cameraPivotTranslation;
+        float moveSpeed = 20f;
+        this.CameraPivot.transform.position += moveSpeed * Time.deltaTime * cameraPivotTranslation;
+
+        Vector2 rightStick = gamepad.rightStick.ReadValue();
+        float rotateSpeedDegreesPerSecond = 180f;
+        float yawDelta = rightStick.x * rotateSpeedDegreesPerSecond * Time.deltaTime;
+        this.CameraPivot.transform.Rotate(0, yawDelta, 0, Space.World);
+
+        if (TryGetScreenCenterHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint, out Vector3 hitNormal)) {
+            float offset = -135f;
+            Quaternion spin = Quaternion.AngleAxis(this.CameraPivot.transform.eulerAngles.y + offset, Vector3.up);
+            Quaternion align = Quaternion.FromToRotation(Vector3.up, hitNormal);
+            Quaternion carOrientation = align * spin;
+
+            this.Car.transform.SetPositionAndRotation(hitPoint, carOrientation);
         }
     }
 
-    // hitPoint is in world space and normalized
-    public static bool TryGetMouseHitPoint(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
+    // hitPoint is in world space and hitNormal is normalized
+    private static bool TryGetScreenCenterHitPoint(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
         hitPoint = default;
         hitNormal = default;
         if (camera == null || collider == null) {
             return false;
         }
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        Vector3 screenCenter = new(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+        Ray ray = camera.ScreenPointToRay(screenCenter);
         if (collider.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
             hitPoint = raycastHit.point;
             hitNormal = raycastHit.normal.normalized;
@@ -64,13 +87,31 @@ public class GameLoop : MonoBehaviour {
     }
 
     // hitPoint is in world space and normalized
-    public static bool TryGetMouseHitPointAny(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
+    private static bool TryGetMouseHitPoint(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
         hitPoint = default;
         hitNormal = default;
         if (camera == null || collider == null) {
             return false;
         }
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        Vector3 mousePosition = new(Mouse.current.position.x.ReadValue(), Mouse.current.position.y.ReadValue(), 0);
+        Ray ray = camera.ScreenPointToRay(mousePosition);
+        if (collider.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
+            hitPoint = raycastHit.point;
+            hitNormal = raycastHit.normal.normalized;
+            return true;
+        }
+        return false;
+    }
+
+    // hitPoint is in world space and normalized
+    private static bool TryGetMouseHitPointAny(Camera camera, Collider collider, out Vector3 hitPoint, out Vector3 hitNormal) {
+        hitPoint = default;
+        hitNormal = default;
+        if (camera == null || collider == null) {
+            return false;
+        }
+        Vector3 mousePosition = new(Mouse.current.position.x.ReadValue(), Mouse.current.position.y.ReadValue(), 0);
+        Ray ray = camera.ScreenPointToRay(mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity)) {
             hitPoint = raycastHit.point;
             hitNormal = raycastHit.normal.normalized;
