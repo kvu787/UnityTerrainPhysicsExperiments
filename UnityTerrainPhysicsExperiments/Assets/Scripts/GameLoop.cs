@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Object position:
@@ -20,14 +21,25 @@ public class GameLoop : MonoBehaviour {
         QualitySettings.vSyncCount = 1;
     }
 
-    /*
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
+        if (!SceneManager.GetSceneByName("UiScene").isLoaded) {
+            SceneManager.LoadScene("UiScene", LoadSceneMode.Additive);
+            Debug.Log("Finished calling 'SceneManager.LoadScene(\"UIScene\", LoadSceneMode.Additive);'");
+        }
     }
-    */
 
     // Update is called once per frame
     void Update() {
+        // TODO
+        // Unity loads scenes asynchronously.
+        // Theoretically, loading a scene can take a long time.
+        // So, I should add a loading indicator or screen.
+        if (!SceneManager.GetSceneByName("UiScene").isLoaded) {
+            Debug.Log("Update: UiScene not loaded yet");
+            return;
+        }
+
         Debug.Log(Input.mousePosition);
 
         if (TryGetMouseHitPoint(this.MainCamera, this.TerrainCollider, out Vector3 hitPoint, out Vector3 hitNormal)) {
