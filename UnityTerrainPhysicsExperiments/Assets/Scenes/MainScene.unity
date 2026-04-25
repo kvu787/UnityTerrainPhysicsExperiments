@@ -403,7 +403,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 1
-  far clip plane: 50
+  far clip plane: 250
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -461,14 +461,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 919853108}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.21307248, y: 0.77515596, z: -0.49003315, w: 0.33704743}
+  m_LocalRotation: {x: 0.21424773, y: 0.77344066, z: -0.492736, w: 0.3363016}
   m_LocalPosition: {x: -3.02, y: 0, z: 2.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 874899834}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 64.6, y: 133, z: 0}
+  m_LocalEulerAnglesHint: {x: 65, y: 133, z: 0}
 --- !u!1001 &1180451836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -602,7 +602,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameLoop
   Car: {fileID: 727399301}
   CameraPivot: {fileID: 919853108}
-  MainCamera: {fileID: 874899833}
+  Camera: {fileID: 874899833}
   TerrainCollider: {fileID: 1180451838}
 --- !u!1001 &2244588862406349370
 PrefabInstance:
