@@ -37,6 +37,14 @@ public class GameLoop : MonoBehaviour {
     private float CameraPivotPitch = 65;
     private float CameraPositionZ = -22;
 
+    private enum ControlMode {
+        MoveCamera,
+        AdjustOffset,
+        None,
+    }
+
+    private ControlMode CurrentControlMode = ControlMode.MoveCamera;
+
     void Awake() {
         Debug.Log($"GameLoop Awake on object='{this.gameObject.name}' in scene='{this.gameObject.scene.name}'");
         QualitySettings.maxQueuedFrames = 0;
@@ -68,6 +76,14 @@ public class GameLoop : MonoBehaviour {
             Vector2 rightStick = gamepad.rightStick.ReadValue();
             float leftTrigger = gamepad.leftTrigger.ReadValue();
             float rightTrigger = gamepad.rightTrigger.ReadValue();
+
+            // Check for mode switch
+            if (Gamepad.current.leftShoulder.wasPressedThisFrame) {
+                this.CurrentControlMode = EnumExtensions.Previous(this.CurrentControlMode);
+            }
+            if (Gamepad.current.rightShoulder.wasPressedThisFrame) {
+                this.CurrentControlMode = EnumExtensions.Next(this.CurrentControlMode);
+            }
 
             // Change camera parameters based on gamepad input
             this.CameraPivotYaw += Time.deltaTime * this.CameraPivotYawSpeed * rightStick.x;
